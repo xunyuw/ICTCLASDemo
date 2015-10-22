@@ -1,127 +1,90 @@
 package com.shawn;
 
 /**
- * Author: Shawn Guo
- * E-mail:air_fighter@163.com
+ * Author:             Shawn Guo
+ * E-mail:             air_fighter@163.com
  *
- * Create Time: 2015/10/16 09:40
- * Last Modified Time: 2015/10/19 10:55
+ * Create Time:        2015/10/16 09:40
+ * Last Modified Time: 2015/10/22 10:21
  *
- * Class Name: ICTCLASDemo
+ * Class Name:         ICTCLASDemo
  * Class Function:
- *          This is the original NLPIR tokenizer, which is used to tokenize the words
- *          without any dictionary.
+ *                     目前完成了基本框架的开发，在目录下读入question.txt中的问题，然后自动
+ *                     将其切分为题干和选项；而后由关系分析组件分析出先关概念词组；最后计算题
+ *                     干词组与选项词组的相似度，选择相似度最大的作为答案。
+ *                     关系分析以“知识图谱”作为搜索基础，通过在知识图谱中宽搜来得到相关概念。
  */
 
-import java.io.*;
-
-import utils.SystemParas;
-import java.util.Vector;
-
-import com.sun.jna.Library;
-import com.sun.jna.Native;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ICTCLASDemo {
 
-    // 定义接口CLibrary，继承自com.sun.jna.Library
-    public interface CLibrary extends Library {
-        // 定义并初始化接口的静态变量
-        CLibrary Instance = (CLibrary) Native.loadLibrary(
-                System.getProperty("user.dir") + "\\NLPIR", CLibrary.class);
+    public Options[] options = new Options[5];
+    public HashMap<String, HashSet<String>> kGraph = new HashMap<>();
 
-        public int NLPIR_Init(String sDataPath, int encoding, String sLicenceCode);
+    public void init() throws IOException, ClassNotFoundException {
+        String inputString = BasicIO.readFile2String("question.txt");
+        inputString += "E. ";
 
-        public String NLPIR_ParagraphProcess(String sSrc, int bPOSTagged);
+        for (int i = 0; i < 5; i++) {
+            options[i] = new Options(inputString.split( (char)Integer.sum(65, i) + ".")[0]);
+            inputString = inputString.split( (char)Integer.sum(65, i) + ".")[1];
+        }
 
-        public String NLPIR_GetKeyWords(String sLine, int nMaxKeyLimit, boolean bWeightOut);
+        /**
+        System.out.println("test-------");
+        for (int i = 0; i < 5; i++) {
+            System.out.println(options[i].words);
+        }
+         */
 
-        public String NLPIR_GetFileKeyWords(String sLine, int nMaxKeyLimit, boolean bWeightOut);
-
-        public int NLPIR_AddUserWord(String sWord);
-
-        public int NLPIR_DelUsrWord(String sWord);
-
-        public int NLPIR_ImportUserDict(String sFilename);
-
-        public String NLPIR_GetLastErrorMsg();
-
-        public void NLPIR_Exit();
     }
 
-    public static void initLib() {
-        int charset_type = 1;
-        String argu = System.getProperty("user.dir");
-        int init_flag = CLibrary.Instance.NLPIR_Init(argu, charset_type, "0");
-
-        if (init_flag == 0) {
-            System.err.println("初始化失败！");
-            System.exit(1);
+    public void printAnswer(int i) {
+        if (i == 0) {
+            System.out.println("C" + "(未能给出答案，该答案是蒙的。)");
+        }
+        else {
+            System.out.println( (char)Integer.sum(64, i) );
         }
     }
 
-    public static void importUserDict(String dictName)
-                    throws IOException, ClassNotFoundException {
-        File inputFile = new File(dictName);
-        FileInputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
+    public static void main (String[] args) throws Exception {
+        ICTCLASDemo self = new ICTCLASDemo();
+        self.init();
+        KGraph kgraph = new KGraph();
+        self.kGraph = kgraph.getKGraph();
+        //System.out.println(self.kGraph);
 
-        String lineString = null;
 
-        try {
-            inputStream = new FileInputStream(inputFile);
-            inputStreamReader = new InputStreamReader(inputStream);
-            bufferedReader = new BufferedReader(inputStreamReader);
-            while ( (lineString = bufferedReader.readLine()) != null) {
-                CLibrary.Instance.NLPIR_AddUserWord(lineString);
+
+        SimilarityComputer similarityComputer = new SimilarityComputer();
+        RelationAnalyzer relationAnalyzer = new RelationAnalyzer();
+        int maxSimilarityIndex = 0;
+        double maxSimilarityValue = 0.0;
+        double similarity = 0.0;
+
+        for (int i = 0; i < 5; i++) {
+            self.options[i].relatedConcepts = relationAnalyzer.getRelatedConceptSet(self.options[i].words, self.kGraph);
+            HashSet<String> compareSet = new HashSet<>(self.options[i].words);
+            compareSet.addAll(self.options[i].relatedConcepts);
+            similarity = similarityComputer.getSimilarity(self.options[0].relatedConcepts, compareSet);
+
+            if(i != 0 && similarity > maxSimilarityValue) {
+                maxSimilarityIndex = i;
+                maxSimilarityValue = similarity;
             }
-        }  catch (IOException e) {
-            System.out.println("读取文件失败！");
-            System.exit(1);
-        } finally {
-            try {
-                bufferedReader.close();
-                inputStreamReader.close();
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+            System.out.println("Option #" + i + ":");
+            System.out.println("\tDictionary Keys：" + self.options[i].words);
+            System.out.println("\tRelated Concepts: " + self.options[i].relatedConcepts);
+            System.out.println("\tCompare Set: " + compareSet);
+            System.out.println("\tSimilarity to question: " + similarity);
         }
-    }
 
-    public static void main(String[] args) throws Exception {
-        try {
-            initLib();
-            String inputString = BasicIO.readFile2String("question.txt");
-            importUserDict(System.getProperty("user.dir") + "\\data\\userDic.txt");
-
-            String outputString = CLibrary.Instance.NLPIR_ParagraphProcess(inputString, 3);
-            String[] tokens = outputString.split(" ", 0);
-            Vector words = new Vector();
-            Vector POSs = new Vector();
-            for(int i = 0; i < tokens.length; i++) {
-                String token = tokens[i].trim();
-                if (token.length() >= 3) {
-                        words.addElement(token.split("/")[0]);
-                        POSs.addElement(token.split("/")[1]);
-                }
-            }
-
-            System.out.println("分词结果为： " + outputString);
-            System.out.println("分割结果为： ");
-            for(int i = 0; i < words.size(); i++) {
-                System.out.println(words.elementAt(i) + " | " + POSs.elementAt(i));
-            }
-
-            int nCountKey = 0;
-            String nativeByte = CLibrary.Instance.NLPIR_GetKeyWords(inputString, 10,false);
-            System.out.print("关键词提取结果是：" + nativeByte);
-
-            CLibrary.Instance.NLPIR_Exit();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        self.printAnswer(maxSimilarityIndex);
 
     }
 }
