@@ -9,7 +9,7 @@ import java.util.Vector;
  * E-mail:             air_fighter@163.com
  *
  * Create Time:        2015/10/20 13:40
- * Last Modified Time: 2015/10/21 14:52
+ * Last Modified Time: 2015/10/26 10:07
  *
  * Class Name:         RelationAnalyzer
  * Class Function:
@@ -19,6 +19,64 @@ import java.util.Vector;
 public class RelationAnalyzer {
 
     public HashSet<String> relatedConceptSet = null;
+
+    private int min3(final int a, final int b, final int c) {
+        return Math.min(Math.min(a, b), c);
+    }
+
+    public double levenshteinDistance(final String str1, final String str2) {
+        int dis[][];
+        int len1 = str1.length();
+        int len2 = str2.length();
+        int i, j;
+        char ch1, ch2;
+        int temp;
+
+        if (len1 == 0) {
+            return len2;
+        }
+
+        if (len2 == 0) {
+            return len1;
+        }
+
+        dis = new int[len1+1][len2+1];
+        for (i = 0; i <= len1; i++) {
+            dis[i][0] = i;
+        }
+        for (j = 0; j <= len2; j++) {
+            dis[0][j] = j;
+        }
+
+        for (i = 1; i <= len1; i++) {
+            ch1 = str1.charAt(i - 1);
+            for (j = 1; j <= len2; j++) {
+                ch2 = str2.charAt(j - 1);
+                if (ch1 == ch2) {
+                    temp = 0;
+                }
+                else {
+                    temp = 1;
+                }
+                dis[i][j] = min3(dis[i-1][j] + 1,
+                                 dis[i][j-1] + 1,
+                                 dis[i-1][j-1] + temp);
+            }
+        }
+
+        return dis[len1][len2] / Math.min(len1, len2);
+    }
+
+    public void generateRelatedConceptSetWithLD(Vector<String> inputVec,
+                                                HashMap<String, HashSet<String>> kGraph, double maxDis) {
+        for (String keyWord : inputVec) {
+            for (String key : kGraph.keySet()) {
+                if (levenshteinDistance(keyWord, key) <= maxDis) {
+                    relatedConceptSet.addAll(kGraph.get(key));
+                }
+            }
+        }
+    }
 
     public void generateRelatedConceptSet(Vector<String> inputVec, HashMap<String, HashSet<String>> kGraph) {
         for (String key : inputVec) {
@@ -35,7 +93,9 @@ public class RelationAnalyzer {
     public HashSet<String> getRelatedConceptSet(Vector<String> inputVec, HashMap<String, HashSet<String>> kGraph) {
         //System.out.print("RelationAnalyzer getRelatedConceptSet: " + inputVec);
         relatedConceptSet = new HashSet<>();
-        generateRelatedConceptSet(inputVec, kGraph);
+//        generateRelatedConceptSet(inputVec, kGraph);
+        double maxDis = 0.5;
+        generateRelatedConceptSetWithLD(inputVec, kGraph, maxDis);
         return relatedConceptSet;
     }
 }

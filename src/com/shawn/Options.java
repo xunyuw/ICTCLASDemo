@@ -13,7 +13,7 @@ import java.util.Vector;
  * E-mail:             air_fighter@163.com
  *
  * Create Time:        2015/10/20 09:54
- * Last Modified Time: 2015/10/20 10:54
+ * Last Modified Time: 2015/10/26 09:15
  *
  * Class Name:         Options
  * Class Function:
@@ -42,9 +42,11 @@ public class Options {
 
             importUserDict(System.getProperty("user.dir") + "\\data\\userDic.txt");
 
-            tokenizeAndTag();
+            tokenizeAndTagOnlyNounTime();
 
-            //outputResult();
+//            tokenizeAndTag();
+
+//            outputResult();
 
             CLibrary.Instance.NLPIR_Exit();
         } catch (Exception ex) {
@@ -126,6 +128,29 @@ public class Options {
         for(int i = 0; i < tokens.length; i++) {
             String token = tokens[i].trim();
             if (token.length() >= 3) {
+                words.addElement(token.split("/")[0]);
+                taggers.addElement(token.split("/")[1]);
+                if (!tagger2Word.containsKey(taggers.lastElement())) {
+                    Vector<String> vec = new Vector<>();
+                    vec.addElement(token.split("/")[0]);
+                    tagger2Word.put(taggers.lastElement(), vec);
+                }
+                else {
+                    tagger2Word.get(taggers.lastElement()).addElement(token.split("/")[0]);
+                }
+            }
+        }
+    }
+
+    public  void tokenizeAndTagOnlyNounTime() throws Exception {
+        outputString = CLibrary.Instance.NLPIR_ParagraphProcess(inputString, 3);
+        tokens = outputString.split(" ", 0);
+        words = new Vector();
+        taggers = new Vector();
+
+        for(int i = 0; i < tokens.length; i++) {
+            String token = tokens[i].trim();
+            if (token.length() >= 3 && (token.matches(".*/t") || token.matches(".*/n"))) {
                 words.addElement(token.split("/")[0]);
                 taggers.addElement(token.split("/")[1]);
                 if (!tagger2Word.containsKey(taggers.lastElement())) {

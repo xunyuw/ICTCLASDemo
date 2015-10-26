@@ -5,7 +5,7 @@ package com.shawn;
  * E-mail:             air_fighter@163.com
  *
  * Create Time:        2015/10/16 09:40
- * Last Modified Time: 2015/10/22 10:21
+ * Last Modified Time: 2015/10/26 10:07
  *
  * Class Name:         ICTCLASDemo
  * Class Function:
@@ -32,13 +32,6 @@ public class ICTCLASDemo {
             options[i] = new Options(inputString.split( (char)Integer.sum(65, i) + ".")[0]);
             inputString = inputString.split( (char)Integer.sum(65, i) + ".")[1];
         }
-
-        /**
-        System.out.println("test-------");
-        for (int i = 0; i < 5; i++) {
-            System.out.println(options[i].words);
-        }
-         */
 
     }
 
@@ -77,11 +70,11 @@ public class ICTCLASDemo {
                 maxSimilarityValue = similarity;
             }
 
-            System.out.println("Option #" + i + ":");
-            System.out.println("\tDictionary Keys£º" + self.options[i].words);
-            System.out.println("\tRelated Concepts: " + self.options[i].relatedConcepts);
-            System.out.println("\tCompare Set: " + compareSet);
-            System.out.println("\tSimilarity to question: " + similarity);
+//            System.out.println("Option #" + i + ":");
+//            System.out.println("\tDictionary Keys£º" + self.options[i].words);
+//            System.out.println("\tRelated Concepts: " + self.options[i].relatedConcepts);
+//            System.out.println("\tCompare Set: " + compareSet);
+//            System.out.println("\tSimilarity to question: " + similarity);
         }
 
         self.printAnswer(maxSimilarityIndex);
