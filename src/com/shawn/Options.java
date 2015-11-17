@@ -13,7 +13,7 @@ import java.util.Vector;
  * E-mail:             air_fighter@163.com
  *
  * Create Time:        2015/10/20 09:54
- * Last Modified Time: 2015/10/26 09:15
+ * Last Modified Time: 2015/10/26 11:24
  *
  * Class Name:         Options
  * Class Function:
@@ -149,18 +149,18 @@ public class Options {
         taggers = new Vector();
 
         for(int i = 0; i < tokens.length; i++) {
+            String matchStr = ".*/t|.*/n.*";
             String token = tokens[i].trim();
-            if (token.length() >= 3 && (token.matches(".*/t") || token.matches(".*/n"))) {
-                words.addElement(token.split("/")[0]);
-                taggers.addElement(token.split("/")[1]);
-                if (!tagger2Word.containsKey(taggers.lastElement())) {
-                    Vector<String> vec = new Vector<>();
-                    vec.addElement(token.split("/")[0]);
-                    tagger2Word.put(taggers.lastElement(), vec);
-                }
-                else {
-                    tagger2Word.get(taggers.lastElement()).addElement(token.split("/")[0]);
-                }
+            if (token.length() >= 3 && token.matches(matchStr) ) {
+                    words.addElement(token.split("/")[0]);
+                    taggers.addElement(token.split("/")[1]);
+                    if (!tagger2Word.containsKey(taggers.lastElement())) {
+                        Vector<String> vec = new Vector<>();
+                        vec.addElement(token.split("/")[0]);
+                        tagger2Word.put(taggers.lastElement(), vec);
+                    } else {
+                        tagger2Word.get(taggers.lastElement()).addElement(token.split("/")[0]);
+                    }
             }
         }
     }

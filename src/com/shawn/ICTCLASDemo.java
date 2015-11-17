@@ -22,15 +22,15 @@ import java.util.HashSet;
 public class ICTCLASDemo {
 
     public Options[] options = new Options[5];
-    public HashMap<String, HashSet<String>> kGraph = new HashMap<>();
+    public HashMap<String, Concept> kGraph = new HashMap<>();
 
     public void init() throws IOException, ClassNotFoundException {
         String inputString = BasicIO.readFile2String("question.txt");
         inputString += "E. ";
 
         for (int i = 0; i < 5; i++) {
-            options[i] = new Options(inputString.split( (char)Integer.sum(65, i) + ".")[0]);
-            inputString = inputString.split( (char)Integer.sum(65, i) + ".")[1];
+            options[i] = new Options(inputString.split((char)Integer.sum(65, i) + ".")[0]);
+            inputString = inputString.split((char)Integer.sum(65, i) + ".")[1];
         }
 
     }
@@ -48,7 +48,7 @@ public class ICTCLASDemo {
         ICTCLASDemo self = new ICTCLASDemo();
         self.init();
         KGraph kgraph = new KGraph();
-        self.kGraph = kgraph.getKGraph();
+        self.kGraph = kgraph.getkGraphFromXML();
         //System.out.println(self.kGraph);
 
 
@@ -59,11 +59,16 @@ public class ICTCLASDemo {
         double maxSimilarityValue = 0.0;
         double similarity = 0.0;
 
+        HashSet<String> compareSet0 = new HashSet<>(self.options[0].words);
+        compareSet0.addAll(self.options[0].relatedConcepts);
+
         for (int i = 0; i < 5; i++) {
+
             self.options[i].relatedConcepts = relationAnalyzer.getRelatedConceptSet(self.options[i].words, self.kGraph);
             HashSet<String> compareSet = new HashSet<>(self.options[i].words);
             compareSet.addAll(self.options[i].relatedConcepts);
-            similarity = similarityComputer.getSimilarity(self.options[0].relatedConcepts, compareSet);
+
+            similarity = similarityComputer.getSimilarity(compareSet0, compareSet);
 
             if(i != 0 && similarity > maxSimilarityValue) {
                 maxSimilarityIndex = i;

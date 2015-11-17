@@ -28,7 +28,7 @@ public class SimilarityComputer {
 
         int joinSize = joinSet.size();
 
-        //Java的语言特性，如果除数和被除数都是整数，结果也是整数，所以必须强制类型转换。
+        //Java鐨勮瑷�鐗规�у喅瀹氫簡鍓嶅悗涓嶈兘閮芥槸鏁村瀷
         return ((double) joinSize) / unionSet.size();
     }
 }

@@ -9,7 +9,7 @@ import java.util.Vector;
  * E-mail:             air_fighter@163.com
  *
  * Create Time:        2015/10/20 13:40
- * Last Modified Time: 2015/10/26 10:07
+ * Last Modified Time: 2015/10/26 10:43
  *
  * Class Name:         RelationAnalyzer
  * Class Function:
@@ -24,7 +24,7 @@ public class RelationAnalyzer {
         return Math.min(Math.min(a, b), c);
     }
 
-    public double levenshteinDistance(final String str1, final String str2) {
+    private double levenshteinDistance(final String str1, final String str2) {
         int dis[][];
         int len1 = str1.length();
         int len2 = str2.length();
@@ -67,18 +67,18 @@ public class RelationAnalyzer {
         return dis[len1][len2] / Math.min(len1, len2);
     }
 
-    public void generateRelatedConceptSetWithLD(Vector<String> inputVec,
-                                                HashMap<String, HashSet<String>> kGraph, double maxDis) {
+    private void generateRelatedConceptSetWithLD(Vector<String> inputVec,
+                                                HashMap<String, Concept> kGraph, double maxDis) {
         for (String keyWord : inputVec) {
             for (String key : kGraph.keySet()) {
                 if (levenshteinDistance(keyWord, key) <= maxDis) {
-                    relatedConceptSet.addAll(kGraph.get(key));
+                    relatedConceptSet.addAll(kGraph.get(key).getAllRelatedConcepts());
                 }
             }
         }
     }
 
-    public void generateRelatedConceptSet(Vector<String> inputVec, HashMap<String, HashSet<String>> kGraph) {
+    private void generateRelatedConceptSet(Vector<String> inputVec, HashMap<String, HashSet<String>> kGraph) {
         for (String key : inputVec) {
             //This is because the knowledge graph is a directed graph.
             if (!kGraph.containsKey(key)) {
@@ -90,12 +90,16 @@ public class RelationAnalyzer {
         }
     }
 
-    public HashSet<String> getRelatedConceptSet(Vector<String> inputVec, HashMap<String, HashSet<String>> kGraph) {
+    public HashSet<String> getRelatedConceptSet(Vector<String> inputVec, HashMap<String, Concept> kGraph) {
         //System.out.print("RelationAnalyzer getRelatedConceptSet: " + inputVec);
+
         relatedConceptSet = new HashSet<>();
+
 //        generateRelatedConceptSet(inputVec, kGraph);
+
         double maxDis = 0.5;
         generateRelatedConceptSetWithLD(inputVec, kGraph, maxDis);
+
         return relatedConceptSet;
     }
 }

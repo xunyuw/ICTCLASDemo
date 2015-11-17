@@ -1,0 +1,11 @@
+<?xmlversion = "1.0" encoding = "UTF-8"?>
+<CONCEPTLIST>
+    <Concept category = "Event">
+        <Name>马歇尔计划</Name>
+        <Description>马歇尔计划（The Marshall Plan），官方名称为欧洲复兴计划（European Recovery Program），是第二次世界大战结束后美国对被战争破坏的西欧各国进行经济援助、协助重建的计划，对欧洲国家的发展和世界政治格局产生了深远的影响。该计划于1948年4月正式启动，并整整持续了4个财政年度之久。在这段时期内，西欧各国通过参加经济合作发展组织（OECD）总共接受了美国包括金融、技术、设备等各种形式的援助合计131.5亿美元。</Description>
+        <RelatedConcepts>
+            <RelatedTo relation = "Domain">经济</RelatedTo>
+            <RelatedTo relation = "ExecutedBy">美国</RelatedTo>
+        </RelatedConcepts>
+    </Concept>
+</CONCEPTLIST>
